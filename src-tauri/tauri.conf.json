@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "devhome",
-		"version": "0.1.0"
+		"version": "0.0.1"
 	},
 	"tauri": {
 		"systemTray": {
@@ -17,11 +17,12 @@
 		},
 		"allowlist": {
 			"fs": {
+				"all": true,
 				"createDir": true,
 				"readDir": true,
 				"readFile": true,
 				"writeFile": true,
-				"scope": ["$APPCONFIG", "$APPCONFIG/*", "**"]
+				"scope": ["$APPCONFIG", "$APPCONFIG/**"]
 			},
 			"path": {
 				"all": true

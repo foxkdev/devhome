@@ -1,6 +1,5 @@
-// import { SettingsManager } from 'tauri-settings';
-import { writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 import { appConfigDir } from '@tauri-apps/api/path';
+import FileManager from './file-manager';
 
 type SettingsType = {
 	[key: string]: object | object[];
@@ -9,10 +8,12 @@ export default class Settings {
 	settingsFile: string;
 	pathFile: string;
 	settings: SettingsType;
+	defaultSettings: SettingsType;
 	constructor() {
 		this.settingsFile = 'settings.json';
 		this.settings = {};
 		this.pathFile = '';
+		this.defaultSettings = {};
 		this.init();
 	}
 	async get(key: string) {
@@ -25,35 +26,30 @@ export default class Settings {
 			[key]: value
 		};
 
-		await this.syncSettings();
+		await FileManager.save(this.settingsFile, this.settings);
 	}
 	async remove(key: string) {
 		delete this.settings[key];
-		await this.syncSettings();
+		await FileManager.save(this.settingsFile, this.settings);
 	}
 	async init() {
 		this.pathFile = `${await appConfigDir()}${this.settingsFile}`;
 		this.loadSettings();
 	}
 
-	async syncSettings() {
-		// await this.loadSettings();
-		try {
-			await writeTextFile(this.settingsFile, JSON.stringify(this.settings), {
-				dir: BaseDirectory.AppConfig
-			});
-		} catch (err) {
-			console.error(err);
-		}
-	}
-
 	async loadSettings() {
-		const content = await readTextFile(this.settingsFile, {
-			dir: BaseDirectory.AppConfig
-		});
-		this.settings = {
-			...this.settings,
-			...JSON.parse(content)
-		};
+		await FileManager.createDir(await appConfigDir());
+		const settings = await FileManager.get(this.pathFile);
+		if (settings) {
+			this.settings = {
+				...this.settings,
+				...JSON.parse(settings)
+			};
+		} else {
+			await FileManager.save(this.settingsFile, this.defaultSettings);
+			this.settings = this.defaultSettings;
+		}
+		console.info('Settings Loaded');
+		return this.settings;
 	}
 }

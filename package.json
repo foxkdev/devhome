@@ -11,7 +11,9 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"setup": "yarn install && yarn setup:tauri",
+		"setup:tauri": "cd src-tauri && cargo update"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
