@@ -5,26 +5,32 @@ type SettingsType = {
 	[key: string]: object | object[];
 };
 export default class Settings {
+	private static instance: Settings | null = null;
 	settingsFile: string;
 	pathFile: string;
 	settings: SettingsType;
 	defaultSettings: SettingsType;
-	constructor() {
+	private constructor() {
 		this.settingsFile = 'settings.json';
 		this.settings = {};
 		this.pathFile = '';
 		this.defaultSettings = {};
 		this.init();
 	}
+
+	public static getInstance(): Settings {
+		if (!Settings.instance) {
+			Settings.instance = new Settings();
+		}
+		return Settings.instance;
+	}
+
 	async get(key: string) {
 		return this.settings[key];
 	}
 	async set(key: string, value: object | object[] | string | number | boolean) {
 		console.log('SET', key, value);
-		this.settings = {
-			...this.settings,
-			[key]: value
-		};
+		this.settings = Object.assign({}, this.settings, { [key]: value });
 
 		await FileManager.save(this.settingsFile, this.settings);
 	}

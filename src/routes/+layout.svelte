@@ -1,9 +1,12 @@
 <script>
 	import { onMount } from 'svelte';
 	import Settings from '$lib/settings';
+	import Projects from '$lib/projects';
 
 	onMount(async () => {
-		const settings = new Settings();
+		const settings = Settings.getInstance();
+		const projects = Projects.getInstance();
+		projects.loadFromSettings();
 		// await settings.set('projects', [{ test: 'ok' }]);
 		// await settings.set('theme', 'dark');
 		// await settings.remove('theme');
