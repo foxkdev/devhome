@@ -7,12 +7,12 @@ export interface ProjectType {
 	repositories: Repository[];
 }
 
-export class Project implements ProjectType {
+export default class Project implements ProjectType {
 	name: string;
 	repositories: Repository[];
 
 	constructor({ name, repositories }: ProjectType) {
-		if (name != '') {
+		if (name === '') {
 			Logger.error('Project name cannot be empty');
 			throw new Error('Project name cannot be empty');
 		}

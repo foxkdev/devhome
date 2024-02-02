@@ -1,4 +1,4 @@
-import { Project } from './project';
+import Project from './project';
 import type { ProjectType } from './project';
 
 import Settings from '$lib/settings';
@@ -34,10 +34,12 @@ export default class Projects {
 			throw new Error(`Project ${project.name} already exists`);
 		}
 		this.projects.push(new Project(project));
+		this.syncSettings();
 	}
 
 	async remove(projectName: string): Promise<void> {
 		this.projects = this.projects.filter((p) => p.name !== projectName);
+		this.syncSettings();
 	}
 	async loadFromSettings() {
 		const projects = (await settings.get('projects')) as object[];
@@ -45,8 +47,8 @@ export default class Projects {
 			this.projects = projects.map((p) => new Project(p as ProjectType));
 		}
 	}
-	exportToSettings() {
+	async syncSettings() {
 		const projects = this.projects.map((p) => p.toJSON());
-		settings.set('projects', projects);
+		await settings.set('projects', projects);
 	}
 }
