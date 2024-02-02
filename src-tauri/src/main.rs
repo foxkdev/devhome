@@ -3,6 +3,7 @@
 
 use tauri::Manager;
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
+use tauri_plugin_log::LogTarget;
 use webbrowser;
 
 fn main() {
@@ -56,6 +57,11 @@ fn main() {
             },
             _ => {}
         })
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
+                .build(),
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

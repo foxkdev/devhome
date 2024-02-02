@@ -1,5 +1,6 @@
 import { appConfigDir } from '@tauri-apps/api/path';
-import FileManager from './file-manager';
+import FileManager from './fs/file-manager';
+import { Logger } from './utils/logger';
 
 type SettingsType = {
 	[key: string]: object | object[];
@@ -7,20 +8,25 @@ type SettingsType = {
 export default class Settings {
 	private static instance: Settings | null = null;
 	settingsFile: string;
-	pathFile: string;
-	settings: SettingsType;
+	pathFile: string = '';
+	settings: SettingsType = {};
 	defaultSettings: SettingsType;
-	constructor() {
+	private constructor() {
 		this.settingsFile = 'settings.json';
 		this.defaultSettings = this.getDefaultSettings();
 		this.getPathSettings();
-		this.setup();
 	}
+	public static getInstance(): Settings {
+		if (!Settings.instance) {
+			Settings.instance = new Settings();
+		}
+		return Settings.instance;
+	}
+
 	async get(key: string) {
 		return this.settings[key];
 	}
 	async set(key: string, value: object | object[] | string | number | boolean) {
-		console.log('SET', key, value);
 		this.settings = Object.assign({}, this.settings, { [key]: value });
 
 		await FileManager.save(this.settingsFile, this.settings);
@@ -36,10 +42,10 @@ export default class Settings {
 			await FileManager.createDir(await appConfigDir());
 			await FileManager.save(this.settingsFile, this.defaultSettings);
 			this.settings = this.defaultSettings;
+			Logger.info('[SETUP] Completed');
 		} else {
 			await this.loadSettings();
 		}
-		console.log('SETUP LOADED');
 	}
 
 	private getDefaultSettings() {
@@ -49,6 +55,7 @@ export default class Settings {
 	}
 	private async loadSettings() {
 		this.settings = await FileManager.get(this.pathFile);
+		Logger.info(`Settings Loaded from ${this.pathFile}`);
 		return this.settings;
 	}
 	private async getPathSettings() {

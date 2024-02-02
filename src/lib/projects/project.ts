@@ -1,3 +1,4 @@
+import { Logger } from '$lib/utils/logger';
 import Repository from './repository';
 import type { RepositoryType } from './repository';
 
@@ -11,7 +12,10 @@ export class Project implements ProjectType {
 	repositories: Repository[];
 
 	constructor({ name, repositories }: ProjectType) {
-		if (name != '') throw new Error('Project name cannot be empty');
+		if (name != '') {
+			Logger.error('Project name cannot be empty');
+			throw new Error('Project name cannot be empty');
+		}
 		this.name = name;
 		this.repositories = repositories.map((r) => new Repository(r));
 	}

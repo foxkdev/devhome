@@ -1,7 +1,8 @@
 import { Project } from './project';
 import type { ProjectType } from './project';
 
-import Settings from './settings';
+import Settings from '$lib/settings';
+import { Logger } from '$lib/utils/logger';
 const settings = Settings.getInstance();
 
 export default class Projects {
@@ -29,7 +30,8 @@ export default class Projects {
 	async add(project: ProjectType): Promise<void> {
 		const exists = await this.get(project.name);
 		if (exists) {
-			throw new Error('Project already exists');
+			Logger.error(`Project ${project.name} already exists`);
+			throw new Error(`Project ${project.name} already exists`);
 		}
 		this.projects.push(new Project(project));
 	}
@@ -39,7 +41,6 @@ export default class Projects {
 	}
 	async loadFromSettings() {
 		const projects = (await settings.get('projects')) as object[];
-		console.log('LOAD FROM SETTINGS', projects);
 		if (projects) {
 			this.projects = projects.map((p) => new Project(p as ProjectType));
 		}

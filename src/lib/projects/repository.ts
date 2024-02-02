@@ -1,3 +1,5 @@
+import { Logger } from '$lib/utils/logger';
+
 export interface RepositoryType {
 	name: string;
 	path: string;
@@ -26,12 +28,13 @@ export default class Repository implements RepositoryType {
 		if (Object.values(PROVIDERS).includes(provider)) {
 			this.provider = provider;
 		} else {
-			throw new Error('Invalid provider');
+			Logger.error(`Invalid provider ${provider}`);
+			throw new Error(`Invalid provider ${provider}`);
 		}
 	}
 
 	async clone() {
-		console.log('Cloning', this.url, 'to', this.path);
+		Logger.info(`Cloning ${this.url} to ${this.path}`);
 	}
 
 	toJSON() {

@@ -1,19 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
+	import { Logger } from '$lib/utils/logger';
 	import Settings from '$lib/settings';
-	import Projects from '$lib/projects';
+	import Projects from '$lib/projects/projects';
 
 	onMount(async () => {
+		Logger.getInstance();
 		const settings = Settings.getInstance();
+		await settings.setup();
 		const projects = Projects.getInstance();
-		projects.loadFromSettings();
-		// await settings.set('projects', [{ test: 'ok' }]);
-		// await settings.set('theme', 'dark');
-		// await settings.remove('theme');
-
-		// await settings.loadSettings();
-		// const data = await settings.get('projects');
-		// console.log('DATA', data);
+		await projects.loadFromSettings();
+		Logger.info('App started');
 	});
 </script>
 

@@ -1,3 +1,4 @@
+import { Logger } from '$lib/utils/logger';
 import { exists, createDir, writeFile, readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 
 export default class FileManager {
@@ -14,12 +15,13 @@ export default class FileManager {
 		return content;
 	}
 	static async get(filePath: string) {
-		const file = await readTextFile(filePath, {
+		return await readTextFile(filePath, {
 			dir: BaseDirectory.AppConfig
-		}).catch((err) => {
-			console.error(err);
-			return null;
-		});
-		return JSON.parse(file);
+		})
+			.then((file) => JSON.parse(file))
+			.catch((err) => {
+				Logger.error(err);
+				return null;
+			});
 	}
 }
