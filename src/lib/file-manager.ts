@@ -1,11 +1,11 @@
 import { exists, createDir, writeFile, readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { appConfigDir } from '@tauri-apps/api/path';
 
 export default class FileManager {
+	static async exists(filePath: string) {
+		return await exists(filePath);
+	}
 	static async createDir(dirPath: string) {
-		if (!(await exists(dirPath))) {
-			await createDir(dirPath);
-		}
+		await createDir(dirPath);
 	}
 	static async save(filePath: string, content: object) {
 		await writeFile(filePath, JSON.stringify(content), {
@@ -14,11 +14,12 @@ export default class FileManager {
 		return content;
 	}
 	static async get(filePath: string) {
-		return readTextFile(filePath, {
+		const file = await readTextFile(filePath, {
 			dir: BaseDirectory.AppConfig
 		}).catch((err) => {
 			console.error(err);
 			return null;
 		});
+		return JSON.parse(file);
 	}
 }

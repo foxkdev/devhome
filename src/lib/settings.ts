@@ -10,21 +10,12 @@ export default class Settings {
 	pathFile: string;
 	settings: SettingsType;
 	defaultSettings: SettingsType;
-	private constructor() {
+	constructor() {
 		this.settingsFile = 'settings.json';
-		this.settings = {};
-		this.pathFile = '';
-		this.defaultSettings = {};
-		this.init();
+		this.defaultSettings = this.getDefaultSettings();
+		this.getPathSettings();
+		this.setup();
 	}
-
-	public static getInstance(): Settings {
-		if (!Settings.instance) {
-			Settings.instance = new Settings();
-		}
-		return Settings.instance;
-	}
-
 	async get(key: string) {
 		return this.settings[key];
 	}
@@ -38,24 +29,30 @@ export default class Settings {
 		delete this.settings[key];
 		await FileManager.save(this.settingsFile, this.settings);
 	}
-	async init() {
-		this.pathFile = `${await appConfigDir()}${this.settingsFile}`;
-		this.loadSettings();
-	}
 
-	async loadSettings() {
-		await FileManager.createDir(await appConfigDir());
-		const settings = await FileManager.get(this.pathFile);
-		if (settings) {
-			this.settings = {
-				...this.settings,
-				...JSON.parse(settings)
-			};
-		} else {
+	async setup() {
+		const exists = await FileManager.exists(await appConfigDir());
+		if (!exists) {
+			await FileManager.createDir(await appConfigDir());
 			await FileManager.save(this.settingsFile, this.defaultSettings);
 			this.settings = this.defaultSettings;
+		} else {
+			await this.loadSettings();
 		}
-		console.info('Settings Loaded');
+		console.log('SETUP LOADED');
+	}
+
+	private getDefaultSettings() {
+		return {
+			projects: []
+		};
+	}
+	private async loadSettings() {
+		this.settings = await FileManager.get(this.pathFile);
 		return this.settings;
+	}
+	private async getPathSettings() {
+		this.pathFile = `${await appConfigDir()}${this.settingsFile}`;
+		return this.pathFile;
 	}
 }
