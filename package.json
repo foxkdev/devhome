@@ -39,7 +39,11 @@
 	"type": "module",
 	"dependencies": {
 		"@tauri-apps/api": "^1.5.3",
+		"autoprefixer": "^10.4.17",
 		"isomorphic-git": "^1.25.3",
+		"postcss": "^8.4.33",
+		"svelte-hero-icons": "^5.1.0",
+		"tailwindcss": "^3.4.1",
 		"tauri-plugin-log-api": "https://github.com/tauri-apps/tauri-plugin-log",
 		"tauri-settings": "^0.3.4"
 	}

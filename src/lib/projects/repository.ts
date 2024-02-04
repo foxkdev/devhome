@@ -36,6 +36,7 @@ export default class Repository implements RepositoryType {
 			.catch((e) => {
 				Logger.error(e);
 			});
+		await this.getBranch();
 	}
 	setNameFromUrl() {
 		this.name = this.url.split('/').pop()?.replace('.git', '') as string;
@@ -55,6 +56,12 @@ export default class Repository implements RepositoryType {
 
 	async clone() {
 		Logger.info(`Cloning ${this.url} to ${this.path}`);
+	}
+
+	async getBranch() {
+		return await invoke('plugin:git_manager|get_branch', {
+			path: this.path
+		});
 	}
 
 	toJSON() {

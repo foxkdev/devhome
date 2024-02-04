@@ -53,8 +53,27 @@ fn get_remote(path: String) -> Result<String, bool> {
     }
 }
 
+#[tauri::command]
+fn get_branch(path: String) -> Result<String, bool> {
+    match open_repo(path) {
+        Ok(repo) => match repo.head() {
+            Ok(head) => {
+                if let Some(name) = head.shorthand() {
+                    Ok(name.to_string())
+                } else {
+                    Err(true)
+                }
+            }
+            Err(_) => Err(true),
+        },
+        Err(_) => Err(false),
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("git_manager")
-        .invoke_handler(tauri::generate_handler![initialize, has_repo, get_remote])
+        .invoke_handler(tauri::generate_handler![
+            initialize, has_repo, get_remote, get_branch
+        ])
         .build()
 }
