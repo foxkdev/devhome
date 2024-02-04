@@ -1,10 +1,10 @@
 import { Logger } from '$lib/utils/logger';
-
+import { invoke } from '@tauri-apps/api';
 export interface RepositoryType {
 	name: string;
 	path: string;
-	url: string;
-	provider: string;
+	url?: string;
+	provider?: string;
 }
 
 const PROVIDERS = {
@@ -17,14 +17,34 @@ export default class Repository implements RepositoryType {
 	name: string;
 	path: string;
 	url: string;
-	constructor({ name, path, url, provider }: RepositoryType) {
+	provider: string;
+	constructor({ name, path, url = '', provider = 'url' }: RepositoryType) {
 		this.name = name;
 		this.path = path;
 		this.url = url;
 		this.provider = provider;
 	}
-
-	set provider(provider: string) {
+	async setup() {
+		await invoke('plugin:git_manager|get_remote', {
+			path: this.path
+		})
+			.then((remote) => {
+				this.url = remote as string;
+				this.setNameFromUrl();
+				this.setProviderFromUrl();
+			})
+			.catch((e) => {
+				Logger.error(e);
+			});
+	}
+	setNameFromUrl() {
+		this.name = this.url.split('/').pop()?.replace('.git', '') as string;
+	}
+	setProviderFromUrl() {
+		const providerPath = this.url.split('/')[2].split('.')[0];
+		this.setProvider(providerPath);
+	}
+	setProvider(provider: string) {
 		if (Object.values(PROVIDERS).includes(provider)) {
 			this.provider = provider;
 		} else {

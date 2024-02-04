@@ -3,6 +3,7 @@ import type { ProjectType } from './project';
 
 import Settings from '$lib/settings';
 import { Logger } from '$lib/utils/logger';
+import Repository from './repository';
 const settings = Settings.getInstance();
 
 export default class Projects {
@@ -27,13 +28,21 @@ export default class Projects {
 		return this.projects.find((p) => p.name === projectName);
 	}
 
-	async add(project: ProjectType): Promise<void> {
-		const exists = await this.get(project.name);
-		if (exists) {
-			Logger.error(`Project ${project.name} already exists`);
-			throw new Error(`Project ${project.name} already exists`);
+	async add(path: string) {
+		const name = path.split('/').pop() || '';
+		if (name == '') {
+			Logger.error('Project name cannot be empty');
+			throw new Error('Project name cannot be empty');
 		}
-		this.projects.push(new Project(project));
+		const exists = await this.get(name);
+		if (exists) {
+			Logger.error(`Project ${name} already exists`);
+			throw new Error(`Project ${name} already exists`);
+		}
+		const project = new Project({ name, path, repository: undefined });
+		await project.setup();
+		this.projects.push(project);
+		console.log('projects added', this.projects);
 		this.syncSettings();
 	}
 
@@ -41,14 +50,26 @@ export default class Projects {
 		this.projects = this.projects.filter((p) => p.name !== projectName);
 		this.syncSettings();
 	}
+
 	async loadFromSettings() {
 		const projects = (await settings.get('projects')) as object[];
 		if (projects) {
-			this.projects = projects.map((p) => new Project(p as ProjectType));
+			this.projects = projects.map((p: any) => {
+				const project = new Project({
+					name: p.name,
+					path: p.path,
+					repository: undefined
+				});
+				if (p.repository) {
+					project.loadFromSettings(p.repository);
+				}
+				return project;
+			});
 		}
 	}
 	async syncSettings() {
 		const projects = this.projects.map((p) => p.toJSON());
+		console.log('SYNC SETTINGS', projects);
 		await settings.set('projects', projects);
 	}
 }

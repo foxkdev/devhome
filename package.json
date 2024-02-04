@@ -39,6 +39,7 @@
 	"type": "module",
 	"dependencies": {
 		"@tauri-apps/api": "^1.5.3",
+		"isomorphic-git": "^1.25.3",
 		"tauri-plugin-log-api": "https://github.com/tauri-apps/tauri-plugin-log",
 		"tauri-settings": "^0.3.4"
 	}

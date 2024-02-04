@@ -1,44 +1,54 @@
 import { Logger } from '$lib/utils/logger';
+// import FileManager from '$lib/fs/file-manager';
 import Repository from './repository';
-import type { RepositoryType } from './repository';
+import { invoke } from '@tauri-apps/api';
 
 export interface ProjectType {
 	name: string;
-	repositories: Repository[];
+	repository: Repository | undefined;
 }
 
 export default class Project implements ProjectType {
 	name: string;
-	repositories: Repository[];
+	path: string;
+	repository: Repository | undefined = undefined;
 
-	constructor({ name, repositories }: ProjectType) {
+	constructor({
+		name,
+		path,
+		repository = undefined
+	}: {
+		name: string;
+		path: string;
+		repository: Repository | undefined;
+	}) {
 		if (name === '') {
 			Logger.error('Project name cannot be empty');
 			throw new Error('Project name cannot be empty');
 		}
 		this.name = name;
-		this.repositories = repositories.map((r) => new Repository(r));
-	}
-	async getRepository(repositoryUrl: string): Promise<Repository | undefined> {
-		return this.repositories.find((r) => r.url === repositoryUrl);
+		this.path = path;
+		this.repository = repository;
 	}
 
-	async addRepository(repository: RepositoryType): Promise<void> {
-		const repo = new Repository(repository);
-		this.repositories.push(repo);
-	}
-
-	async removeRepository(repositoryUrl: string): Promise<void> {
-		const repo = await this.getRepository(repositoryUrl);
-		if (repo) {
-			this.repositories = this.repositories.filter((r) => r.url !== repositoryUrl);
+	async setup() {
+		const exists = await invoke('plugin:git_manager|has_repo', {
+			path: this.path
+		});
+		if (exists) {
+			this.repository = new Repository({ name: this.name, path: this.path });
+			await this.repository.setup();
 		}
+	}
+	async loadFromSettings(repository) {
+		this.repository = new Repository(repository);
 	}
 
 	toJSON() {
 		return {
 			name: this.name,
-			repositories: this.repositories.map((r) => r.toJSON())
+			path: this.path,
+			repository: this.repository?.toJSON()
 		};
 	}
 }

@@ -27,6 +27,27 @@
 			"path": {
 				"all": true
 			},
+			"dialog": {
+				"all": true,
+				"ask": true,
+				"confirm": true,
+				"message": true,
+				"open": true,
+				"save": true
+			},
+			"shell": {
+				"all": true,
+				"execute": true,
+				"sidecar": true,
+				"open": true,
+				"scope": [
+					{
+						"name": "git",
+						"cmd": "git",
+						"args": ["status"]
+					}
+				]
+			},
 			"all": false
 		},
 		"bundle": {

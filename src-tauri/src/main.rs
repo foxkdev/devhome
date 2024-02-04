@@ -6,6 +6,7 @@ use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemT
 use tauri_plugin_log::LogTarget;
 use webbrowser;
 
+mod git_manager;
 fn main() {
     println!("Initializing...");
     // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
@@ -62,6 +63,7 @@ fn main() {
                 .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
                 .build(),
         )
+        .plugin(git_manager::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
